@@ -94,8 +94,9 @@ class Player(pygame.sprite.Sprite):
             self.y_direction = 0
 
         if keys[pygame.K_TAB]:
-            weapo
+            print("test2")
         if keys[pygame.K_1]:
+            print("HI")
             
 
 
@@ -117,8 +118,10 @@ class Player(pygame.sprite.Sprite):
                         self.hitbox.top = sprite.hitbox.bottom
 
     def inventory(self):
+        print("HI")
 
     def weapons(self):
+        print("HI")
     def update(self):
         self.keyboard_input()
         self.hitbox.x += self.x_direction
