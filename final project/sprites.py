@@ -8,7 +8,7 @@ class Sprites:
         self.obstacle_sprites = pygame.sprite.Group()
         # set up sprites and create map
         self.create_map()
-
+sdfsdfsdefsdf
     def create_map(self):
         # layer num allows certain sprites to be generated lower/higher than others
         for layer_num in range(2):
