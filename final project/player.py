@@ -18,6 +18,7 @@ class Player(pygame.sprite.Sprite):
         self.sprite_down = pygame.image.load("pacman-down.gif")
         self.sprite_down_walk = pygame.image.load("player\\down\\down_0.png")
         self.sprite_down_walk_2 = pygame.image.load("player\\down\\down_1.png")
+        self.walking_sounds_outdoors = [pygame.mixer.Sound("audio\\footstep-outdoors-1"),pygame.mixer.Sound("audio\\footstep-outdoors-2"), pygame.mixer.Sound("audio\\footstep-outdoors-3"), pygame.mixer.Sound("audio\\footstep-outdoors-4")]
         #self.up_direction_sprites = [self.sprite_up_walk, self.sprite_up_walk_2]
         #self.down_direction_sprites = [self.sprite_down_walk, self.sprite_down_walk_2]
         #self.left_direction_sprites = [self.sprite_left_walk, self.sprite_left_walk_2]
