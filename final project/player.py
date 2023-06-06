@@ -2,22 +2,28 @@ import pygame
 import map
 import random
 
+
+def inventory():
+    print("HI")
+
+
 class Player(pygame.sprite.Sprite):
     def __init__(self, position, sprite_group, obstacle_sprites):
         super().__init__(sprite_group)
         self.clock = pygame.time.Clock()
+        self.cursor_image = pygame.image.load("sprites\\Crosshairs_Red.svg.png")
         self.sprite_right = pygame.image.load("pacman-right.gif")
-        self.sprite_right_walk = pygame.image.load("player\\right\\right_0.png")
-        self.sprite_right_walk_2 = pygame.image.load("player\\right\\right_1.png")
+        self.sprite_right_walk = pygame.image.load("sprites\\player\\right\\right_0.png")
+        self.sprite_right_walk_2 = pygame.image.load("sprites\\player\\right\\right_1.png")
         self.sprite_left = pygame.image.load("pacman-left.gif")
-        self.sprite_left_walk = pygame.image.load("player\\left\\left_0.png")
-        self.sprite_left_walk_2 = pygame.image.load("player\\left\\left_1.png")
+        self.sprite_left_walk = pygame.image.load("sprites\\player\\left\\left_0.png")
+        self.sprite_left_walk_2 = pygame.image.load("sprites\\player\\left\\left_1.png")
         self.sprite_up = pygame.image.load("pacman-up.gif")
-        self.sprite_up_walk = pygame.image.load("player\\up\\up_0.png")
-        self.sprite_up_walk_2 = pygame.image.load("player\\up\\up_1.png")
+        self.sprite_up_walk = pygame.image.load("sprites\\player\\up\\up_0.png")
+        self.sprite_up_walk_2 = pygame.image.load("sprites\\player\\up\\up_1.png")
         self.sprite_down = pygame.image.load("pacman-down.gif")
-        self.sprite_down_walk = pygame.image.load("player\\down\\down_0.png")
-        self.sprite_down_walk_2 = pygame.image.load("player\\down\\down_1.png")
+        self.sprite_down_walk = pygame.image.load("sprites\\player\\down\\down_0.png")
+        self.sprite_down_walk_2 = pygame.image.load("sprites\\player\\down\\down_1.png")
         self.walking_sounds_outdoors = [pygame.mixer.Sound("audio\\footstep-outdoors-1.mp3"),pygame.mixer.Sound("audio\\footstep-outdoors-2.mp3"), pygame.mixer.Sound("audio\\footstep-outdoors-3.mp3"), pygame.mixer.Sound("audio\\footstep-outdoors-4.mp3")]
         #self.up_direction_sprites = [self.sprite_up_walk, self.sprite_up_walk_2]
         #self.down_direction_sprites = [self.sprite_down_walk, self.sprite_down_walk_2]
@@ -124,10 +130,10 @@ class Player(pygame.sprite.Sprite):
 
     def inventory(self):
         print("HI")
-
-    def weapons(self):
-        print("HI")
+    def crosshair(self):
+        cursor_position = pygame.mouse.get_pos()
     def update(self):
+        self.crosshair()
         self.keyboard_input()
         self.hitbox.x += self.x_direction
         self.collisions("horizontal")

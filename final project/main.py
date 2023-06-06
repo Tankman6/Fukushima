@@ -4,7 +4,7 @@ import pygame, sprites, map, player
 class Game:
     def __init__(self):
         pygame.init()
-        self.screen = pygame.display.set_mode((640, 480))
+        self.screen = pygame.display.set_mode((1080, 720))
         pygame.display.set_caption("Fukushima 2044")
         self.clock = pygame.time.Clock()
         self.keepGoing = True
