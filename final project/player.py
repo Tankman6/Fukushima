@@ -4,14 +4,12 @@ import random
 
 
 def inventory():
-    print("HI")
-
+    pass
 
 class Player(pygame.sprite.Sprite):
     def __init__(self, position, sprite_group, obstacle_sprites):
         super().__init__(sprite_group)
         self.clock = pygame.time.Clock()
-        self.cursor_image = pygame.image.load("sprites\\Crosshairs_Red.svg.png")
         self.sprite_right = pygame.image.load("pacman-right.gif")
         self.sprite_right_walk = pygame.image.load("sprites\\player\\right\\right_0.png")
         self.sprite_right_walk_2 = pygame.image.load("sprites\\player\\right\\right_1.png")
@@ -48,7 +46,6 @@ class Player(pygame.sprite.Sprite):
             else:
                 self.image = self.sprite_left_walk_2
             self.move_timer += 17  # 17*60 = about 1 second (1000)
-            print(self.move_timer)
             if self.move_timer >= 500:
                 self.animation_num = not self.animation_num
                 self.move_timer -= 500
@@ -59,7 +56,6 @@ class Player(pygame.sprite.Sprite):
             else:
                 self.image = self.sprite_right_walk_2
             self.move_timer += 17  # 17*60 = about 1 second (1000)
-            print(self.move_timer)
             if self.move_timer >= 500:
                 self.animation_num = not self.animation_num
                 self.move_timer -= 500
@@ -77,7 +73,6 @@ class Player(pygame.sprite.Sprite):
             else:
                 self.image = self.sprite_up_walk_2
             self.move_timer += 17 # 17*60 = about 1 second (1000)
-            print(self.move_timer)
             if self.move_timer >= 500:
                 self.animation_num = not self.animation_num
                 self.move_timer -= 500
@@ -91,7 +86,7 @@ class Player(pygame.sprite.Sprite):
                 self.image = self.sprite_down_walk_2
                 self.walking_sounds_outdoors[random.randint(0, 3)].play()
             self.move_timer += 17  # 17*60 = about 1 second (1000)
-            print(self.move_timer)
+
             if self.move_timer >= 500:
                 self.animation_num = not self.animation_num
                 self.move_timer -= 500
@@ -102,14 +97,15 @@ class Player(pygame.sprite.Sprite):
                 self.image = self.sprite_down
             self.y_direction = 0
 
-            print("WOW")
         if keys[pygame.K_TAB]:
-            print("test2")
+            pass
         if keys[pygame.K_1]:
-            print("HI")
+            pass
+
+
+
 
         # code doesnt work since it still constantly plays as the animation is checked every 60 seconds so it needs to work on tick system
-
 
     def collisions(self, direction):
         if direction == "horizontal":
@@ -130,13 +126,25 @@ class Player(pygame.sprite.Sprite):
 
     def inventory(self):
         print("HI")
-    def crosshair(self):
-        cursor_position = pygame.mouse.get_pos()
+
+
     def update(self):
-        self.crosshair()
         self.keyboard_input()
         self.hitbox.x += self.x_direction
         self.collisions("horizontal")
         self.hitbox.y += self.y_direction
         self.collisions("vertical")
         self.rect.center = self.hitbox.center
+
+class Weapon(Player):
+    def print_crosshair(self):
+        cursor_pos = pygame.mouse.get_pos()
+        cursor_center_x = cursor_pos[0] - 11
+        cursor_center_y = cursor_pos[1] - 11
+        return cursor_center_x, cursor_center_y
+    def shotgun(self):
+        pass
+    def rifle(self):
+        pass
+    def pistol(self):
+        pass
