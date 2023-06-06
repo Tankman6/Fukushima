@@ -1,6 +1,6 @@
 import pygame
 import map
-
+import random
 
 class Player(pygame.sprite.Sprite):
     def __init__(self, position, sprite_group, obstacle_sprites):
@@ -80,8 +80,10 @@ class Player(pygame.sprite.Sprite):
             self.y_direction = 1
             if self.animation_num == 0:
                 self.image = self.sprite_down_walk
+
             else:
                 self.image = self.sprite_down_walk_2
+                self.walking_sounds_outdoors[random.randint(0, 3)].play()
             self.move_timer += 17  # 17*60 = about 1 second (1000)
             print(self.move_timer)
             if self.move_timer >= 500:
@@ -94,11 +96,13 @@ class Player(pygame.sprite.Sprite):
                 self.image = self.sprite_down
             self.y_direction = 0
 
+            print("WOW")
         if keys[pygame.K_TAB]:
             print("test2")
         if keys[pygame.K_1]:
             print("HI")
-            
+
+        # code doesnt work since it still constantly plays as the animation is checked every 60 seconds so it needs to work on tick system
 
 
     def collisions(self, direction):
