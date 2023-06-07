@@ -7,7 +7,8 @@ class Player(pygame.sprite.Sprite):
     def __init__(self, position, sprite_group, obstacle_sprites):
         super().__init__(sprite_group)
         self.clock = pygame.time.Clock()
-        self.inventory_state = [None, None, None, None, None, None]
+        self.player_hitpoints = 100
+        self.armor_value = 0
         self.sprite_right = pygame.image.load("pacman-right.gif")
         self.sprite_right_walk = pygame.image.load("sprites\\player\\right\\right_0.png")
         self.sprite_right_walk_2 = pygame.image.load("sprites\\player\\right\\right_1.png")
@@ -108,7 +109,6 @@ class Player(pygame.sprite.Sprite):
         else:
             pass
 
-
         # code doesnt work since it still constantly plays as the animation is checked every 60 seconds so it needs to work on tick system
 
     def collisions(self, direction):
@@ -136,30 +136,58 @@ class Player(pygame.sprite.Sprite):
         self.collisions("vertical")
         self.rect.center = self.hitbox.center
 
-    def add_inventory_item(self, item_pos, item):
-        for inventory_slot in len(self.inventory_state):
-            if self.inventory_state[inventory_slot] is None:
-                self.inventory_state[inventory_slot] = item
-    def remove_inventory_item(self, item_pos):
-        pass
-    def equip_inventory_item(self, item_pos, item_type):
-        if item_type == "heal":
-            pass
-        elif item_type == "weapon":
-            pass
-        elif item_type == "armor":
-            pass
-        else:
-
     def print_crosshair(self):
         cursor_pos = pygame.mouse.get_pos()
         cursor_center_x = cursor_pos[0] - 11
         cursor_center_y = cursor_pos[1] - 11
+        # could movev this somewhere els to make it more efficient
+        pygame.mouse.set_visible(False)
         return cursor_center_x, cursor_center_y
+
+class Inventory(Player):
+    def __init__(self):
+        # hopefully the inventory won't keep resetting
+        self.inventory_state = [None, None, None, None, None, None]
+    def add_inventory_item(self, item_pos, item):
+        for inventory_slot in len(self.inventory_state):
+            if self.inventory_state[inventory_slot] is None:
+                self.inventory_state[inventory_slot] = item
+
+    def remove_inventory_item(self, item_pos):
+        self.inventory_state[item_pos] = None
+
+    def use_inventory_item(self, item_pos, item_type):
+        # item_type should be a 2 item list with the firt one being the general type, and the second being specific value
+        if item_type[0] == "heal":
+            self.player_hitpoints += item_type[1]
+            if self.player_hitpoints > 100:
+                self.player_hitpoints = 100
+            # remove inventory item
+        elif item_type[0] == "armor":
+            self.armor_value += item_type[1]
+        else:
+            pass
+            # play sound effect error sound maybe
+    def render_inventory(self, screen):
+        inventory_slot_width = 50
+        inventory_slot_height = 50
+        inventory_margin = 10
+        inventory_x = 10
+        inventory_y = 10
+
+        for i, item in enumerate(self.inventory_state):
+            slot_x = inventory_x + i * (inventory_slot_width + inventory_margin)
+            slot_y = inventory_y
+
+            pygame.draw.rect(screen, (255, 255, 255), (slot_x, slot_y, inventory_slot_width, inventory_slot_height))
+            if item is not None:
+                # Draw the item image or text representation on the inventory slot
+                item_image = pygame.image.load(item.image_path)  # Assuming each item has an image_path attribute
+                screen.blit(item_image, (slot_x, slot_y))
 
 
 class Gun(Player):
-    def __init__(self,gun_type):
+    def __init__(self, gun_type):
         gun_types = {
             "sniper": {
                 "gun_idle": "sprites\\gun_sprites\\PNG\\sniper_rifle_idle.png",
@@ -187,6 +215,10 @@ class Gun(Player):
         self.gun_firing = gun_types.get(gun_type, {}).get("gun_firing")
         self.gun_reloading = gun_types.get(gun_type, {}).get("gun_reloading")
 
+    def shoot(self):
+        self.image = self.gun_firing
+
+
 class Item(Player):
     def keycard(self):
         pass
@@ -208,17 +240,24 @@ class Item(Player):
 
     def MRE(self):
         pass
+
     def water(self):
         pass
+
     def milk(self):
         pass
+
     def bandage(self):
         pass
+
     def iPod(self):
         pass
+
     def photograph(self):
         pass
+
     def soap(self):
         pass
+
     def toothpaste(self):
         pass

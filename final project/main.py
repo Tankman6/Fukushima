@@ -9,7 +9,7 @@ class Game:
         self.clock = pygame.time.Clock()
         self.keepGoing = True
         self.sprites = sprites.Sprites(self.screen)
-
+        self.inventory = player.Inventory(self.screen)
     def start(self):
         while self.keepGoing:
             for event in pygame.event.get():
