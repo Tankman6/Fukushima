@@ -25,7 +25,7 @@ class Sprites:
                             tile.Tile((x_pos, y_pos), [self.visible_sprites, self.obstacle_sprites])
 
     def update(self):
-        self.visible_sprites.custom_draw(self.player.rect.centerx, self.player.rect.centery)
+        self.visible_sprites.custom_draw(self.player.rect.centerx, self.player.rect.centery)z
         self.visible_sprites.update()
         # update and draw the game
     # sprite_interactions
@@ -53,4 +53,4 @@ class CameraGroup(pygame.sprite.Group):
             offset_y = sprite.rect.topleft[1] - self.offset[1]
             offset_pos = (offset_x, offset_y)
             self.screen.blit(sprite.image, offset_pos)
-        self.screen.blit(self.cursor_image, player.Weapon.print_crosshair(self))
+        self.screen.blit(self.cursor_image, player.Player.print_crosshair(self))

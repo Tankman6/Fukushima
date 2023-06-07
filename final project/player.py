@@ -3,13 +3,11 @@ import map
 import random
 
 
-def inventory():
-    pass
-
 class Player(pygame.sprite.Sprite):
     def __init__(self, position, sprite_group, obstacle_sprites):
         super().__init__(sprite_group)
         self.clock = pygame.time.Clock()
+        self.inventory_state = [None, None, None, None, None, None]
         self.sprite_right = pygame.image.load("pacman-right.gif")
         self.sprite_right_walk = pygame.image.load("sprites\\player\\right\\right_0.png")
         self.sprite_right_walk_2 = pygame.image.load("sprites\\player\\right\\right_1.png")
@@ -22,11 +20,14 @@ class Player(pygame.sprite.Sprite):
         self.sprite_down = pygame.image.load("pacman-down.gif")
         self.sprite_down_walk = pygame.image.load("sprites\\player\\down\\down_0.png")
         self.sprite_down_walk_2 = pygame.image.load("sprites\\player\\down\\down_1.png")
-        self.walking_sounds_outdoors = [pygame.mixer.Sound("audio\\footstep-outdoors-1.mp3"),pygame.mixer.Sound("audio\\footstep-outdoors-2.mp3"), pygame.mixer.Sound("audio\\footstep-outdoors-3.mp3"), pygame.mixer.Sound("audio\\footstep-outdoors-4.mp3")]
-        #self.up_direction_sprites = [self.sprite_up_walk, self.sprite_up_walk_2]
-        #self.down_direction_sprites = [self.sprite_down_walk, self.sprite_down_walk_2]
-        #self.left_direction_sprites = [self.sprite_left_walk, self.sprite_left_walk_2]
-        #self.right_direction_sprites = [self.sprite_right_walk, self.sprite_right_walk_2]
+        self.walking_sounds_outdoors = [pygame.mixer.Sound("audio\\footstep-outdoors-1.mp3"),
+                                        pygame.mixer.Sound("audio\\footstep-outdoors-2.mp3"),
+                                        pygame.mixer.Sound("audio\\footstep-outdoors-3.mp3"),
+                                        pygame.mixer.Sound("audio\\footstep-outdoors-4.mp3")]
+        # self.up_direction_sprites = [self.sprite_up_walk, self.sprite_up_walk_2]
+        # self.down_direction_sprites = [self.sprite_down_walk, self.sprite_down_walk_2]
+        # self.left_direction_sprites = [self.sprite_left_walk, self.sprite_left_walk_2]
+        # self.right_direction_sprites = [self.sprite_right_walk, self.sprite_right_walk_2]
         self.image = self.sprite_right
         self.rect = self.image.get_rect(topleft=position)
         self.x_direction = 0
@@ -72,7 +73,7 @@ class Player(pygame.sprite.Sprite):
                 self.image = self.sprite_up_walk
             else:
                 self.image = self.sprite_up_walk_2
-            self.move_timer += 17 # 17*60 = about 1 second (1000)
+            self.move_timer += 17  # 17*60 = about 1 second (1000)
             if self.move_timer >= 500:
                 self.animation_num = not self.animation_num
                 self.move_timer -= 500
@@ -103,17 +104,15 @@ class Player(pygame.sprite.Sprite):
             pass
 
 
-
-
         # code doesnt work since it still constantly plays as the animation is checked every 60 seconds so it needs to work on tick system
 
     def collisions(self, direction):
         if direction == "horizontal":
             for sprite in self.obstacle_sprites:
                 if sprite.hitbox.colliderect(self.hitbox):
-                    if self.x_direction > 0: # moving right
+                    if self.x_direction > 0:  # moving right
                         self.hitbox.right = sprite.hitbox.left
-                    if self.x_direction < 0: # moving left
+                    if self.x_direction < 0:  # moving left
                         self.hitbox.left = sprite.hitbox.right
 
         if direction == "vertical":
@@ -124,10 +123,6 @@ class Player(pygame.sprite.Sprite):
                     if self.y_direction < 0:
                         self.hitbox.top = sprite.hitbox.bottom
 
-    def inventory(self):
-        print("HI")
-
-
     def update(self):
         self.keyboard_input()
         self.hitbox.x += self.x_direction
@@ -136,15 +131,64 @@ class Player(pygame.sprite.Sprite):
         self.collisions("vertical")
         self.rect.center = self.hitbox.center
 
-class Weapon(Player):
+    def add_inventory_item(self, item_pos, item):
+        for inventory_slot in len(self.inventory_state):
+            if self.inventory_state[inventory_slot] is None:
+                self.inventory_state[inventory_slot] = item
+    def remove_inventory_item(self, item_pos):
+
     def print_crosshair(self):
         cursor_pos = pygame.mouse.get_pos()
         cursor_center_x = cursor_pos[0] - 11
         cursor_center_y = cursor_pos[1] - 11
         return cursor_center_x, cursor_center_y
+
+
+class Item(Player):
+    def __init__(self):
+        pass
     def shotgun(self):
         pass
+
     def rifle(self):
         pass
+
     def pistol(self):
+        pass
+
+    def sniper(self):
+        pass
+    def keycard(self):
+        pass
+
+    def money_bag(self):
+        pass
+
+    def can_of_beans(self):
+        pass
+
+    def notebook(self):
+        pass
+
+    def light_armor(self):
+        pass
+
+    def heavy_armor(self):
+        pass
+
+    def MRE(self):
+        pass
+    def water(self):
+        pass
+    def milk(self):
+        pass
+    def bandage(self):
+        pass
+    def iPod(self):
+        pass
+    def photograph(self):
+        pass
+    def soap(self):
+        pass
+    def toothpaste(self):
         pass
