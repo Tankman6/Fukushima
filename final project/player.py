@@ -136,7 +136,7 @@ class Player(pygame.sprite.Sprite):
             if self.inventory_state[inventory_slot] is None:
                 self.inventory_state[inventory_slot] = item
     def remove_inventory_item(self, item_pos):
-
+        pass
     def print_crosshair(self):
         cursor_pos = pygame.mouse.get_pos()
         cursor_center_x = cursor_pos[0] - 11

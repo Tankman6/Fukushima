@@ -25,7 +25,7 @@ class Sprites:
                             tile.Tile((x_pos, y_pos), [self.visible_sprites, self.obstacle_sprites])
 
     def update(self):
-        self.visible_sprites.custom_draw(self.player.rect.centerx, self.player.rect.centery)z
+        self.visible_sprites.custom_draw(self.player.rect.centerx, self.player.rect.centery)
         self.visible_sprites.update()
         # update and draw the game
     # sprite_interactions
