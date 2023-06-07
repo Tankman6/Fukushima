@@ -102,6 +102,11 @@ class Player(pygame.sprite.Sprite):
             pass
         if keys[pygame.K_1]:
             pass
+        if pygame.mouse.get_pressed()[0]:
+            # change this to actually shooting the gun
+            self.image = self.sprite_down_walk
+        else:
+            pass
 
 
         # code doesnt work since it still constantly plays as the animation is checked every 60 seconds so it needs to work on tick system
@@ -137,6 +142,15 @@ class Player(pygame.sprite.Sprite):
                 self.inventory_state[inventory_slot] = item
     def remove_inventory_item(self, item_pos):
         pass
+    def equip_inventory_item(self, item_pos, item_type):
+        if item_type == "heal":
+            pass
+        elif item_type == "weapon":
+            pass
+        elif item_type == "armor":
+            pass
+        else:
+
     def print_crosshair(self):
         cursor_pos = pygame.mouse.get_pos()
         cursor_center_x = cursor_pos[0] - 11
@@ -144,20 +158,36 @@ class Player(pygame.sprite.Sprite):
         return cursor_center_x, cursor_center_y
 
 
+class Gun(Player):
+    def __init__(self,gun_type):
+        gun_types = {
+            "sniper": {
+                "gun_idle": "sprites\\gun_sprites\\PNG\\sniper_rifle_idle.png",
+                "gun_firing": None,
+                "gun_reloading": None
+            },
+            "rifle": {
+                "gun_idle": "sprites\\gun_sprites\\PNG\\assault_rifle_idle.png",
+                "gun_firing": None,
+                "gun_reloading": None
+            },
+            "pistol": {
+                "gun_idle": "sprites\\gun_sprites\\PNG\\pistol_idle.png",
+                "gun_firing": None,
+                "gun_reloading": None
+            },
+            "shotgun": {
+                "gun_idle": "sprites\\gun_sprites\\PNG\\shotgun_idle.png",
+                "gun_firing": None,
+                "gun_reloading": None
+            }
+        }
+
+        self.gun_idle = gun_types.get(gun_type, {}).get("gun_idle")
+        self.gun_firing = gun_types.get(gun_type, {}).get("gun_firing")
+        self.gun_reloading = gun_types.get(gun_type, {}).get("gun_reloading")
+
 class Item(Player):
-    def __init__(self):
-        pass
-    def shotgun(self):
-        pass
-
-    def rifle(self):
-        pass
-
-    def pistol(self):
-        pass
-
-    def sniper(self):
-        pass
     def keycard(self):
         pass
 
