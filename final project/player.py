@@ -146,10 +146,12 @@ class Player(pygame.sprite.Sprite):
 
 class Inventory(Player):
     def __init__(self):
+        # super().__init__()
         # hopefully the inventory won't keep resetting
+        self.inventory_sprite = pygame.transform.scale(pygame.image.load("sprites\\item_sprites\\inventory_back.png"),(80,80))
         self.inventory_state = [None, None, None, None, None, None]
     def add_inventory_item(self, item_pos, item):
-        for inventory_slot in len(self.inventory_state):
+        for inventory_slot in self.inventory_state:
             if self.inventory_state[inventory_slot] is None:
                 self.inventory_state[inventory_slot] = item
 
@@ -162,28 +164,43 @@ class Inventory(Player):
             self.player_hitpoints += item_type[1]
             if self.player_hitpoints > 100:
                 self.player_hitpoints = 100
+            self.remove_inventory_item(item_pos)
             # remove inventory item
         elif item_type[0] == "armor":
             self.armor_value += item_type[1]
+            if self.armor_value > self.item_type[1]:
+                self.armor_value = self.item_type[1]
+            self.remove_inventory_item(item_pos)
         else:
+            # you can't equip a gun if youve already ohvered over it
+            # actually we can just blit the thing onto the inventory
             pass
             # play sound effect error sound maybe
+
+        # I KINDA USE CHATGPT SO THIS AInt GONNA WORK
     def render_inventory(self, screen):
         inventory_slot_width = 50
         inventory_slot_height = 50
         inventory_margin = 10
-        inventory_x = 10
-        inventory_y = 10
-
-        for i, item in enumerate(self.inventory_state):
-            slot_x = inventory_x + i * (inventory_slot_width + inventory_margin)
-            slot_y = inventory_y
-
-            pygame.draw.rect(screen, (255, 255, 255), (slot_x, slot_y, inventory_slot_width, inventory_slot_height))
+        inventory_x = 150
+        for i in range(6):
+            inventory_x += 95
+            screen.blit(self.inventory_sprite, (inventory_x, 600))
+        for item in self.inventory_state:
             if item is not None:
-                # Draw the item image or text representation on the inventory slot
-                item_image = pygame.image.load(item.image_path)  # Assuming each item has an image_path attribute
-                screen.blit(item_image, (slot_x, slot_y))
+                # last list should just be a sublist of all the sprites
+                THIS SHOULD BE THE SYSTEM (FIX USE INVENTORY ITEMS TOO) (item type, value of HP/consumable,(sublist of all the sprites that are associated))
+                inventory_image = pygame.image.load(item[2][0])
+                screen.blit item
+
+         #   slot_x = inventory_x + i * (inventory_slot_width + inventory_margin)
+          #  slot_y = inventory_y
+#
+ #           pygame.draw.rect(screen, (255, 255, 255), (slot_x, slot_y, inventory_slot_width, inventory_slot_height))
+  #          if item is not None:
+   #             # Draw the item image or text representation on the inventory slot
+    #            item_image = pygame.image.load(item.image_path)  # Assuming each item has an image_path attribute
+     #           screen.blit(item_image, (slot_x, slot_y))
 
 
 class Gun(Player):

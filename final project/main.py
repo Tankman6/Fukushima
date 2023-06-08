@@ -9,7 +9,7 @@ class Game:
         self.clock = pygame.time.Clock()
         self.keepGoing = True
         self.sprites = sprites.Sprites(self.screen)
-        self.inventory = player.Inventory(self.screen)
+        self.inventory = player.Inventory()
     def start(self):
         while self.keepGoing:
             for event in pygame.event.get():
@@ -18,6 +18,7 @@ class Game:
 
             self.screen.fill((0, 0, 0))
             self.sprites.update()
+            self.inventory.render_inventory(self.screen)
             pygame.display.update()
             pygame.display.flip()
             self.clock.tick(60)
