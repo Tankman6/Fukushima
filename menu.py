@@ -4,10 +4,6 @@ Date: June 5, 2023
 Description: Menu
 """
 
-# this will be menu
-# include settings, help and start
-# maybe make a save feature
-
 # IMPORTS
 import pygame
 pygame.init()
@@ -21,7 +17,7 @@ fps = 60
 timer = pygame.time.Clock()
 
 main_menu = False
-font = pygame.font.Font('./graphics/Retro Gaming.ttf', 24)
+font = pygame.font.Font('Retro Gaming.ttf', 24)
 
 
 class Button:
@@ -30,7 +26,7 @@ class Button:
         self.pos = pos
         self.screen = screen
 
-        self.button = pygame.image.load("./graphics/button1.png")
+        self.button = pygame.image.load("button1.png")
         self.button_rect = self.button.get_rect()
         self.button_rect.centerx = self.pos[0]
         self.button_rect.centery = self.pos[1]
@@ -52,7 +48,6 @@ class Button:
 
     def press(self):
         if self.button_rect.collidepoint(pygame.mouse.get_pos()) and pygame.mouse.get_pressed()[0]:
-            screen.blit(self.button, self.button_rect)
             return True
         else:
             return False
