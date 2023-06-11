@@ -34,7 +34,6 @@ class Sprites:
 class CameraGroup(pygame.sprite.Group):
     def __init__(self):
         super().__init__()
-        self.cursor_image = pygame.image.load("sprites\\Crosshairs_Red.png")
         self.screen = pygame.display.get_surface()
         self.half_width = self.screen.get_width() // 2
         self.half_height = self.screen.get_height() // 2
@@ -53,4 +52,5 @@ class CameraGroup(pygame.sprite.Group):
             offset_y = sprite.rect.topleft[1] - self.offset[1]
             offset_pos = (offset_x, offset_y)
             self.screen.blit(sprite.image, offset_pos)
+        self.cursor_image = pygame.image.load("sprites\\Crosshairs_Red.png")
         self.screen.blit(self.cursor_image, player.Player.print_crosshair(self))

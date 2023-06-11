@@ -9,7 +9,7 @@ class Player(pygame.sprite.Sprite):
         self.clock = pygame.time.Clock()
         self.player_hitpoints = 100
         self.armor_value = 0
-        self.sprite_right = pygame.image.load("pacman-right.gif")
+        self.sprite_right = pygame.image.load("sprites\\player\\right\\right_0.png")
         self.sprite_right_walk = pygame.image.load("sprites\\player\\right\\right_0.png")
         self.sprite_right_walk_2 = pygame.image.load("sprites\\player\\right\\right_1.png")
         self.sprite_left = pygame.image.load("pacman-left.gif")
@@ -47,6 +47,7 @@ class Player(pygame.sprite.Sprite):
                 self.image = self.sprite_left_walk
             else:
                 self.image = self.sprite_left_walk_2
+                self.walking_sounds_outdoors[random.randint(0, 3)].play()
             self.move_timer += 17  # 17*60 = about 1 second (1000)
             if self.move_timer >= 500:
                 self.animation_num = not self.animation_num
@@ -57,6 +58,7 @@ class Player(pygame.sprite.Sprite):
                 self.image = self.sprite_right_walk
             else:
                 self.image = self.sprite_right_walk_2
+                self.walking_sounds_outdoors[random.randint(0, 3)].play()
             self.move_timer += 17  # 17*60 = about 1 second (1000)
             if self.move_timer >= 500:
                 self.animation_num = not self.animation_num
@@ -74,6 +76,7 @@ class Player(pygame.sprite.Sprite):
                 self.image = self.sprite_up_walk
             else:
                 self.image = self.sprite_up_walk_2
+                self.walking_sounds_outdoors[random.randint(0, 3)].play()
             self.move_timer += 17  # 17*60 = about 1 second (1000)
             if self.move_timer >= 500:
                 self.animation_num = not self.animation_num
@@ -105,7 +108,16 @@ class Player(pygame.sprite.Sprite):
             pass
         if pygame.mouse.get_pressed()[0]:
             # change this to actually shooting the gun
-            self.image = self.sprite_down_walk
+            pass
+            # also checks location of mouse cursor to see if there's a collision or not between a chest sprite
+
+            # temp copied code
+            # get a list of all sprites that are under the mouse cursor
+            # clicked_sprites = [s for s in sprites if s.rect.collidepoint(pos)]
+            # do something with the clicked sprites...
+        if pygame.mouse.get_pressed():
+            pass
+
         else:
             pass
 
@@ -149,7 +161,8 @@ class Inventory(Player):
         # super().__init__()
         # hopefully the inventory won't keep resetting
         self.inventory_sprite = pygame.transform.scale(pygame.image.load("sprites\\item_sprites\\inventory_back.png"),(80,80))
-        self.inventory_state = [None, None, None, None, None, None]
+        self.inventory_state = [["gun","assault_rifle",["sprites\\gun_sprites\\PNG\\assault_rifle_inventory.png"]], ["gun","assault_rifle",["sprites\\gun_sprites\\PNG\\sniper_inventory.png"]], None, None, None, None]
+        self.weapon = None
     def add_inventory_item(self, item_pos, item):
         for inventory_slot in self.inventory_state:
             if self.inventory_state[inventory_slot] is None:
@@ -171,7 +184,13 @@ class Inventory(Player):
             if self.armor_value > self.item_type[1]:
                 self.armor_value = self.item_type[1]
             self.remove_inventory_item(item_pos)
+        elif item_type[0] == "gun":
+            # craate gun class now
+            # should not remove inventory
+            self.weapon = None # Gun(item_type[1])
+
         else:
+
             # you can't equip a gun if youve already ohvered over it
             # actually we can just blit the thing onto the inventory
             pass
@@ -186,12 +205,15 @@ class Inventory(Player):
         for i in range(6):
             inventory_x += 95
             screen.blit(self.inventory_sprite, (inventory_x, 600))
+        inventory_x = 253
         for item in self.inventory_state:
             if item is not None:
+
                 # last list should just be a sublist of all the sprites
-                THIS SHOULD BE THE SYSTEM (FIX USE INVENTORY ITEMS TOO) (item type, value of HP/consumable,(sublist of all the sprites that are associated))
+                # THIS SHOULD BE THE SYSTEM (FIX USE INVENTORY ITEMS TOO) (item type, value of HP/consumable,(sublist of all the sprites that are associated))
                 inventory_image = pygame.image.load(item[2][0])
-                screen.blit item
+                screen.blit(inventory_image, (inventory_x,607))
+            inventory_x += 95
 
          #   slot_x = inventory_x + i * (inventory_slot_width + inventory_margin)
           #  slot_y = inventory_y
@@ -203,78 +225,176 @@ class Inventory(Player):
      #           screen.blit(item_image, (slot_x, slot_y))
 
 
-class Gun(Player):
-    def __init__(self, gun_type):
-        gun_types = {
-            "sniper": {
-                "gun_idle": "sprites\\gun_sprites\\PNG\\sniper_rifle_idle.png",
-                "gun_firing": None,
-                "gun_reloading": None
-            },
-            "rifle": {
-                "gun_idle": "sprites\\gun_sprites\\PNG\\assault_rifle_idle.png",
-                "gun_firing": None,
-                "gun_reloading": None
-            },
-            "pistol": {
-                "gun_idle": "sprites\\gun_sprites\\PNG\\pistol_idle.png",
-                "gun_firing": None,
-                "gun_reloading": None
-            },
-            "shotgun": {
-                "gun_idle": "sprites\\gun_sprites\\PNG\\shotgun_idle.png",
-                "gun_firing": None,
-                "gun_reloading": None
-            }
-        }
-
-        self.gun_idle = gun_types.get(gun_type, {}).get("gun_idle")
-        self.gun_firing = gun_types.get(gun_type, {}).get("gun_firing")
-        self.gun_reloading = gun_types.get(gun_type, {}).get("gun_reloading")
-
-    def shoot(self):
-        self.image = self.gun_firing
-
-
+# honestly this is kind of redundant
 class Item(Player):
-    def keycard(self):
+    def __init__(self, item_type, item_subtype, item_image, inventory_image):
+        self.item_info = [item_type, item_subtype, [item_image, inventory_image]]
+
+    def __str__(self):
+        return self.info
+
+    def display_item(self):
         pass
 
-    def money_bag(self):
-        pass
 
-    def can_of_beans(self):
-        pass
+class Keycard(Item):
+    def __init__(self):
+        item_type = "other"
+        item_subtype = "keycard"
+        item_image = None
+        inventory_image = None  # [/* inventory image directory here */]
+        super().__init__(item_type, item_subtype, item_image, inventory_image)
 
-    def notebook(self):
-        pass
 
-    def light_armor(self):
-        pass
+class PlasticFork(Item):
+    def __init__(self):
+        item_type = "other"
+        item_subtype = "fork"
+        item_image = None
+        inventory_image = None  # [/* inventory image directory here */]
+        super().__init__(item_type, item_subtype, item_image, inventory_image)
 
-    def heavy_armor(self):
-        pass
 
-    def MRE(self):
-        pass
+class CanOfBeans(Item):
+    def __init__(self):
+        item_type = "other"
+        item_subtype = "can"
+        item_image = None
+        inventory_image = None  # [/* inventory image directory here */]
+        super().__init__(item_type, item_subtype, item_image, inventory_image)
 
-    def water(self):
-        pass
 
-    def milk(self):
-        pass
+class Notebook(Item):
+    def __init__(self):
+        item_type = "other"
+        item_subtype = "notebook"
+        item_image = None
+        inventory_image = None  # [/* inventory image directory here */]
+        super().__init__(item_type, item_subtype, item_image, inventory_image)
 
-    def bandage(self):
-        pass
 
-    def iPod(self):
-        pass
+class LightArmor(Item):
+    def __init__(self):
+        item_type = "armor"
+        item_subtype = 50
+        item_image = None
+        inventory_image = None  # [/* inventory image directory here */]
+        super().__init__(item_type, item_subtype, item_image, inventory_image)
 
-    def photograph(self):
-        pass
 
-    def soap(self):
-        pass
+class HeavyArmor(Item):
+    def __init__(self):
+        item_type = "armor"
+        item_subtype = 100
+        item_image = None
+        inventory_image = None  # [/* inventory image directory here */]
+        super().__init__(item_type, item_subtype, item_image, inventory_image)
 
-    def toothpaste(self):
-        pass
+
+class MRE(Item):
+    def __init__(self):
+        item_type = "heal"
+        item_subtype = 75
+        item_image = None
+        inventory_image = None  # [/* inventory image directory here */]
+        super().__init__(item_type, item_subtype, item_image, inventory_image)
+
+
+class Water(Item):
+    def __init__(self):
+        item_type = "heal"
+        item_subtype = 35
+        item_image = None
+        inventory_image = None  # [/* inventory image directory here */]
+        super().__init__(item_type, item_subtype, item_image, inventory_image)
+
+
+class Milk(Item):
+    def __init__(self):
+        item_type = "heal"
+        item_subtype = 50
+        item_image = None
+        inventory_image = None  # [/* inventory image directory here */]
+        super().__init__(item_type, item_subtype, item_image, inventory_image)
+
+
+class Bandage(Item):
+    def __init__(self):
+        item_type = "heal"
+        item_subtype = 100
+        item_image = None
+        inventory_image = None  # [/* inventory image directory here */]
+        super().__init__(item_type, item_subtype, item_image, inventory_image)
+
+
+class iPod(Item):
+    def __init__(self):
+        item_type = "other"
+        item_subtype = "iPod"
+        item_image = None
+        inventory_image = None  # [/* inventory image directory here */]
+        super().__init__(item_type, item_subtype, item_image, inventory_image)
+
+
+class Photograph(Item):
+    def __init__(self):
+        item_type = "other"
+        item_subtype = "photograph"
+        item_image = None
+        inventory_image = None  # [/* inventory image directory here */]
+        super().__init__(item_type, item_subtype, item_image, inventory_image)
+
+
+class Soap(Item):
+    def __init__(self):
+        item_type = "other"
+        item_subtype = "soap"
+        item_image = None
+        inventory_image = None  # [/* inventory image directory here */]
+        super().__init__(item_type, item_subtype, item_image, inventory_image)
+
+
+class Toothpaste(Item):
+    def __init__(self):
+        item_type = "other"
+        item_subtype = "toothpaste"
+        item_image = None
+        inventory_image = None  # [/* inventory image directory here */]
+        super().__init__(item_type, item_subtype, item_image, inventory_image)
+
+    class Gun(Player):
+        def __init__(self, gun_type):
+            self.gun_type = gun_type
+            gun_types = {
+                "sniper": {
+                    "gun_idle": "sprites\\gun_sprites\\PNG\\sniper_rifle_idle.png",
+                    "gun_firing": None,
+                    "gun_reloading": None
+                },
+                "rifle": {
+                    "gun_idle": "sprites\\gun_sprites\\PNG\\assault_rifle_idle.png",
+                    "gun_firing": None,
+                    "gun_reloading": None
+                },
+                "pistol": {
+                    "gun_idle": "sprites\\gun_sprites\\PNG\\pistol_idle.png",
+                    "gun_firing": None,
+                    "gun_reloading": None
+                },
+                "shotgun": {
+                    "gun_idle": "sprites\\gun_sprites\\PNG\\shotgun_idle.png",
+                    "gun_firing": None,
+                    "gun_reloading": None
+                }
+            }
+            self.reload_times = {"sniper": 5, "assault_rifle": 3}
+            self.gun_idle = gun_types.get(self.gun_type, {}).get("gun_idle")
+            self.gun_firing = gun_types.get(self.gun_type, {}).get("gun_firing")
+            self.gun_reloading = gun_types.get(self.gun_type, {}).get("gun_reloading")
+
+        def shoot(self):
+            if gun_type == "test":
+                self.image = self.gun_firing
+
+        def reload(self):
+            self.image = self.gun_reloading
