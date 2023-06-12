@@ -4,8 +4,12 @@ import random
 
 
 class Player(pygame.sprite.Sprite):
+    # we put this here so the inventory doesn't need to call superclass init method, therefore the parameters for init
+    # arent messed up
+
     def __init__(self, position, sprite_group, obstacle_sprites):
         super().__init__(sprite_group)
+        self.inventory = Inventory()
         self.clock = pygame.time.Clock()
         self.player_hitpoints = 100
         self.armor_value = 0
@@ -15,7 +19,7 @@ class Player(pygame.sprite.Sprite):
         self.sprite_left = pygame.image.load("pacman-left.gif")
         self.sprite_left_walk = pygame.image.load("sprites\\player\\left\\left_0.png")
         self.sprite_left_walk_2 = pygame.image.load("sprites\\player\\left\\left_1.png")
-        self.sprite_up = pygame.image.load("pacman-up.gif")
+        self.sprite_up =  pygame.image.load("pacman-up.gif")
         self.sprite_up_walk = pygame.image.load("sprites\\player\\up\\up_0.png")
         self.sprite_up_walk_2 = pygame.image.load("sprites\\player\\up\\up_1.png")
         self.sprite_down = pygame.image.load("pacman-down.gif")
@@ -40,6 +44,7 @@ class Player(pygame.sprite.Sprite):
         self.hitbox = self.rect.inflate(-5, -5)
 
     def keyboard_input(self):
+        mouse_clicked = False
         keys = pygame.key.get_pressed()
         if keys[pygame.K_a]:
             self.x_direction = -1
@@ -106,18 +111,40 @@ class Player(pygame.sprite.Sprite):
             pass
         if keys[pygame.K_1]:
             pass
-        if pygame.mouse.get_pressed()[0]:
+        if not mouse_clicked:
+            if pygame.mouse.get_pressed()[0]:
+                mouse_clicked = True
+                print(mouse_clicked)
+                mouse_pos = pygame.mouse.get_pos()
+                print(mouse_pos)
+
             # change this to actually shooting the gun
-            pass
+
             # also checks location of mouse cursor to see if there's a collision or not between a chest sprite
 
             # temp copied code
             # get a list of all sprites that are under the mouse cursor
             # clicked_sprites = [s for s in sprites if s.rect.collidepoint(pos)]
             # do something with the clicked sprites...
-        if pygame.mouse.get_pressed():
-            pass
 
+            # this part  checks for whether they clicked over the inventory area
+
+
+                if mouse_pos[1] in range (600,695):
+                    if mouse_pos[0] in range(245,340):
+                        print("success")
+                    if mouse_pos[0] in range(340,435):
+                        print("success2")
+                    if mouse_pos[0] in range(435,530):
+                        print("success3")
+                    if mouse_pos[0] in range(530,625):
+                        print('success4')
+                    if mouse_pos[0] in range(625,720):
+                        print('success5')
+                    if mouse_pos[0] in range(720,815):
+                        print('success6')
+        if pygame.MOUSEBUTTONUP:
+            mouse_clicked = False
         else:
             pass
 
@@ -158,18 +185,19 @@ class Player(pygame.sprite.Sprite):
 
 class Inventory(Player):
     def __init__(self):
-        # super().__init__()
+        self.player_items = [Apple(), None, None, None, None, None]
         # hopefully the inventory won't keep resetting
         self.inventory_sprite = pygame.transform.scale(pygame.image.load("sprites\\item_sprites\\inventory_back.png"),(80,80))
-        self.inventory_state = [["gun","assault_rifle",["sprites\\gun_sprites\\PNG\\assault_rifle_inventory.png"]], ["gun","assault_rifle",["sprites\\gun_sprites\\PNG\\sniper_inventory.png"]], None, None, None, None]
+        # BIG CHANGE: CHANGE INVENTORY STATE TO CLEAR ITEMS. ALSO MAKE THIS A LIST OF CLASSES (BASED ON ITEM), AND TO GET THE INFORMATION FOR THEM, USE A STR FUNCTION
         self.weapon = None
-    def add_inventory_item(self, item_pos, item):
-        for inventory_slot in self.inventory_state:
-            if self.inventory_state[inventory_slot] is None:
-                self.inventory_state[inventory_slot] = item
+    def add_inventory_item(self, item):
+        for inventory_slot in self.player_items:
+            if self.player_items[inventory_slot] is None:
+                # item should be a class
+                self.player_items[inventory_slot] = item
 
     def remove_inventory_item(self, item_pos):
-        self.inventory_state[item_pos] = None
+        self.player_items[item_pos] = None
 
     def use_inventory_item(self, item_pos, item_type):
         # item_type should be a 2 item list with the firt one being the general type, and the second being specific value
@@ -206,12 +234,12 @@ class Inventory(Player):
             inventory_x += 95
             screen.blit(self.inventory_sprite, (inventory_x, 600))
         inventory_x = 253
-        for item in self.inventory_state:
+        for item in self.player_items:
             if item is not None:
 
                 # last list should just be a sublist of all the sprites
                 # THIS SHOULD BE THE SYSTEM (FIX USE INVENTORY ITEMS TOO) (item type, value of HP/consumable,(sublist of all the sprites that are associated))
-                inventory_image = pygame.image.load(item[2][0])
+                inventory_image = pygame.image.load(item.get_item_info()[2][1])
                 screen.blit(inventory_image, (inventory_x,607))
             inventory_x += 95
 
@@ -227,13 +255,14 @@ class Inventory(Player):
 
 # honestly this is kind of redundant
 class Item(Player):
-    def __init__(self, item_type, item_subtype, item_image, inventory_image):
-        self.item_info = [item_type, item_subtype, [item_image, inventory_image]]
+    def __init__(self, item_type, item_subtype, item_images, inventory_image):
+        self.item_info = [item_type, item_subtype, [item_images, inventory_image]]
 
-    def __str__(self):
-        return self.info
+    def get_item_info(self):
+        return self.item_info
 
     def display_item(self):
+        # should take the image that should be displayed as a parameter, as well as coordinates for where
         pass
 
 
@@ -327,12 +356,12 @@ class Bandage(Item):
         super().__init__(item_type, item_subtype, item_image, inventory_image)
 
 
-class iPod(Item):
+class Apple(Item):
     def __init__(self):
-        item_type = "other"
-        item_subtype = "iPod"
-        item_image = None
-        inventory_image = None  # [/* inventory image directory here */]
+        item_type = "heal"
+        item_subtype = 20
+        item_image = "sprites\\item_sprites\\apple.png"
+        inventory_image = "sprites\\item_sprites\\apple_inventory.png"
         super().__init__(item_type, item_subtype, item_image, inventory_image)
 
 

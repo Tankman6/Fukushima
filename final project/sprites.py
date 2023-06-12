@@ -18,10 +18,10 @@ class Sprites:
                     y_pos = row * map.TILESIZE
                     # HERE WE SHOULD FIX WHAT SPRITES SHOULD BE LOWER/HIGHER THAN THE PLAYER. Otherwise though it doesn't mater
                     if map.Fukushima_Map[row][col] == "P":
-                        if layer_num == 0:
+                        if layer_num == 1:
                             self.player = player.Player((x_pos, y_pos), [self.visible_sprites], self.obstacle_sprites)
                     if map.Fukushima_Map[row][col] == "O":
-                        if layer_num == 1:
+                        if layer_num == 0:
                             tile.Tile((x_pos, y_pos), [self.visible_sprites, self.obstacle_sprites])
 
     def update(self):
