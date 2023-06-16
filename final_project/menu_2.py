@@ -33,7 +33,7 @@ class Button:
         self.pos = pos
         self.screen = screen
 
-        self.button = pygame.image.load("graphics/sprites/UI/button1.png")
+        self.button = pygame.image.load("graphics/UI/button1.png")
         self.button_rect = self.button.get_rect()
         self.button_rect.centerx = self.pos[0]
         self.button_rect.centery = self.pos[1]
@@ -55,7 +55,6 @@ class Button:
 
     def press(self):
         if self.button_rect.collidepoint(pygame.mouse.get_pos()) and pygame.mouse.get_pressed()[0]:
-            screen.blit(self.button, self.button_rect)
             return True
         else:
             return False
@@ -105,7 +104,7 @@ def draw_menu():
 run = True
 while run:
     screen.fill((114, 117, 27))
-    # background = pygame.image.load('fuki4.png')
+    background = pygame.image.load('fuki4.png')
     # screen.blit(background, (0, -1600))
 
     timer.tick(fps)

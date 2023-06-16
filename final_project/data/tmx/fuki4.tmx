@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.10.1" orientation="orthogonal" renderorder="right-down" width="100" height="100" tilewidth="32" tileheight="32" infinite="0" nextlayerid="31" nextobjectid="981">
+<map version="1.10" tiledversion="1.10.1" orientation="orthogonal" renderorder="right-down" width="100" height="100" tilewidth="32" tileheight="32" infinite="0" nextlayerid="31" nextobjectid="982">
  <editorsettings>
   <export target="fuki4.csv" format="csv"/>
  </editorsettings>
@@ -972,7 +972,7 @@
   <object id="279" gid="3350" x="-16" y="3118" width="131" height="175"/>
   <object id="280" gid="3350" x="10" y="2897" width="131" height="175"/>
   <object id="282" gid="3350" x="241" y="3112" width="131" height="175"/>
-  <object id="980" gid="3364" x="1593.1" y="1418.28" width="176.277" height="96.2473"/>
+  <object id="980" gid="3364" x="1855.61" y="939.977" width="95.5336" height="43.9333" rotation="20.6367"/>
  </objectgroup>
  <objectgroup id="25" name="Chests" locked="1">
   <object id="949" gid="3362" x="478" y="1512.91" width="45" height="43"/>

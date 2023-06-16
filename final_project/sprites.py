@@ -1,6 +1,6 @@
-import pygame, player, os
-from player import Player
-
+import os
+import player
+import pygame
 from pytmx.util_pygame import load_pygame
 
 from settings import *
@@ -14,7 +14,7 @@ class Tile(pygame.sprite.Sprite):
         self.image = surface
         self.rect = self.image.get_rect(topleft=position)
         self.z = z
-        self.hitbox = self.rect.copy().inflate(-self.rect.width*0.2, -self.rect.height*0.75)
+        self.hitbox = self.rect.copy().inflate(-self.rect.width*0.1, -self.rect.height*0.5)
 
 
 class Trees(Tile):
@@ -55,7 +55,7 @@ class Sprites:
         # Map borders made with stone walls
         for x, y, surf in tmx_data.get_layer_by_name("Borders").tiles():
             pos = (x * 32, y * 32)
-            Tile(position=pos, surface=surf, groups=[self.sprite_group, self.obstacle_sprites], z=LAYERS['Borders'])
+            Tile(position=pos, surface=surf, groups=[self.sprite_group], z=LAYERS['Borders'])
 
         # Facility
         for layer in ["Facility", "Facility Deco", "Facility Deco 2"]:

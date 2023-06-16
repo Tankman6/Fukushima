@@ -1,7 +1,5 @@
 import os
-
 import pygame
-
 from settings import *
 
 os.chdir(os.getcwd())
@@ -60,11 +58,11 @@ class Player(pygame.sprite.Sprite):
                                   'up_attack': [], 'down_attack': [], 'right_attack': [], 'left_attack': []}
 
         for animation in self.player_animations.keys():
-            full_path = "./graphics/player/" + animation
+            full_path = "./graphics/other_player/" + animation
             self.player_animations[animation] = import_folder(full_path)
 
     def animate(self, dt):
-        self.frame_index += 10 * dt
+        self.frame_index += 4 * dt
         if self.frame_index >= len(self.player_animations[self.status]):
             self.frame_index = 0
 
