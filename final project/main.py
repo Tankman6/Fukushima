@@ -1,4 +1,4 @@
-import pygame, sprites, map, player
+import pygame, sprites, map, player, items
 
 
 class Game:
@@ -22,7 +22,6 @@ class Game:
 
             self.screen.fill((0, 0, 0))
             self.sprites.update()
-            self.sprites.player.inventory.render_player_items(self.screen)
             # MOVE THIS CODE TO THE PLAYER UPDATE FUNCTION PROBABLY
             self.screen.blit(self.cursor_image, player.Player.print_crosshair(self))
             pygame.display.update()
