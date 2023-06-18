@@ -1,9 +1,10 @@
-import pygame, map, tile, player
+import pygame, map, tile, player, bot
 
 
 class Sprites:
     def __init__(self, screen):
         # visible sprites = seen ones that don't have collision, obstacles = collisions
+        self.screen = screen
         self.visible_sprites = CameraGroup()
         self.obstacle_sprites = pygame.sprite.Group()
         # set up sprites and create map
@@ -19,10 +20,14 @@ class Sprites:
                     # HERE WE SHOULD FIX WHAT SPRITES SHOULD BE LOWER/HIGHER THAN THE PLAYER. Otherwise though it doesn't mater
                     if map.Fukushima_Map[row][col] == "P":
                         if layer_num == 1:
-                            self.player = player.Player((x_pos, y_pos), [self.visible_sprites], self.obstacle_sprites)
+                            self.player = player.Player((x_pos, y_pos), [self.visible_sprites], self.obstacle_sprites, self.screen)
                     if map.Fukushima_Map[row][col] == "O":
                         if layer_num == 0:
                             tile.Tile((x_pos, y_pos), [self.visible_sprites, self.obstacle_sprites])
+                    if map.Fukushima_Map[row][col] == "A":
+                        if layer_num == 1:
+                            self.AI = bot.Bot((x_pos, y_pos), [self.visible_sprites], self.obstacle_sprites, self.screen)
+
 
     def update(self):
         self.visible_sprites.custom_draw(self.player.rect.centerx, self.player.rect.centery)

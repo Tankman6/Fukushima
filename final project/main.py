@@ -10,7 +10,6 @@ class Game:
         self.clock = pygame.time.Clock()
         self.keepGoing = True
         self.sprites = sprites.Sprites(self.screen)
-        self.inventory = player.Inventory()
         self.cursor_image = pygame.image.load("sprites\\Crosshairs_Red.png")
         self.background_audio = pygame.mixer.music.load("audio\\background-ambience.mp3")
         pygame.mixer.music.play(loops=-1)
@@ -23,7 +22,8 @@ class Game:
 
             self.screen.fill((0, 0, 0))
             self.sprites.update()
-            self.inventory.render_inventory(self.screen)
+            self.sprites.player.inventory.render_player_items(self.screen)
+            # MOVE THIS CODE TO THE PLAYER UPDATE FUNCTION PROBABLY
             self.screen.blit(self.cursor_image, player.Player.print_crosshair(self))
             pygame.display.update()
             pygame.display.flip()
