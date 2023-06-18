@@ -1,6 +1,7 @@
 import pygame
 import map
 import random
+import sprites
 
 class Player(pygame.sprite.Sprite):
     # we put this here so the inventory doesn't need to call superclass init method, therefore the parameters for init
@@ -8,12 +9,11 @@ class Player(pygame.sprite.Sprite):
 
     def __init__(self, position, sprite_group, obstacle_sprites, screen):
         super().__init__(sprite_group)
-        self.bullet_sprites = pygame.sprite.Group()
         self.screen = screen
         self.mouse_clicked = False
         self.clock = pygame.time.Clock()
         self.player_hitpoints = 100
-        self.armor_value = 0
+        self.armor_value = 100
         self.inventory = Inventory(self.player_hitpoints, self.armor_value, self.screen)
         self.sprite_right = pygame.image.load("sprites\\player\\right\\right_0.png")
         self.sprite_right_walk = pygame.image.load("sprites\\player\\right\\right_0.png")
@@ -31,6 +31,8 @@ class Player(pygame.sprite.Sprite):
                                         pygame.mixer.Sound("audio\\footstep-outdoors-2.mp3"),
                                         pygame.mixer.Sound("audio\\footstep-outdoors-3.mp3"),
                                         pygame.mixer.Sound("audio\\footstep-outdoors-4.mp3")]
+        self.pain_sounds = [pygame.mixer.Sound("audio\\pain_sound.wav"),pygame.mixer.Sound("audio\\pain_sound_2.wav"), pygame.mixer.Sound("audio\\pain_sound_3.wav")]
+        self.death_sounds = [pygame.mixer.Sound("audio\\death_sound.wav"), pygame.mixer.Sound("audio\\death_sound_2.wav"), pygame.mixer.Sound("audio\\death_sound_3.wav")]
         # self.up_direction_sprites = [self.sprite_up_walk, self.sprite_up_walk_2]
         # self.down_direction_sprites = [self.sprite_down_walk, self.sprite_down_walk_2]
         # self.left_direction_sprites = [self.sprite_left_walk, self.sprite_left_walk_2]
@@ -48,7 +50,7 @@ class Player(pygame.sprite.Sprite):
         self.my_hitbox_visualizer = pygame.Surface(self.hitbox.size)
         self.my_hitbox_visualizer.fill((255,0,0))
 
-    def keyboard_input(self):
+    def keyboard_input(self, bullet_sprites):
         keys = pygame.key.get_pressed()
         if self.inventory.weapon is not None:
             self.image = self.sprite_right_walk_2
@@ -114,6 +116,9 @@ class Player(pygame.sprite.Sprite):
             self.y_direction = 0
         if keys[pygame.K_r]:
             self.reload_pressed = True
+            self.gun_reloading_sound = pygame.mixer.Sound("audio\\gun_reload.mp3")
+            channel3 = pygame.mixer.Channel(2)
+            channel3.play(self.gun_reloading_sound)
 
         if pygame.mouse.get_pressed()[0]:
             mouse_pos = pygame.mouse.get_pos()
@@ -131,7 +136,7 @@ class Player(pygame.sprite.Sprite):
             # Mouse cursor is not over the inventory area
             if self.inventory.weapon is not None and (not (245 <= mouse_pos[0] <= 720 and 600 <= mouse_pos[1] <= 695)):
                 if self.mouse_clicked is False:
-                    self.inventory.weapon.shoot(self.screen,mouse_pos, self.bullet_sprites, self.obstacle_sprites, self.hitbox)
+                    self.inventory.weapon.shoot(self.screen,mouse_pos, bullet_sprites, self.obstacle_sprites, self.hitbox)
             # for if you click menu button
             if True:
                 pass
@@ -145,11 +150,20 @@ class Player(pygame.sprite.Sprite):
 
         # code doesnt work since it still constantly plays as the animation is checked every 60 seconds so it needs to work on tick system
 
-    def collisions(self, direction):
+    def collisions(self, direction, bullet_sprites):
         # this doesn't work unless if a bullet hits yourself
-        for sprite in self.bullet_sprites:
+        for sprite in bullet_sprites:
             if sprite.rect.colliderect(self.hitbox):
-                self.player_hitpoints -= 25
+                channel5 = pygame.mixer.Channel(4)
+                channel5.play(self.pain_sounds[random.randint(0,2)])
+                if self.inventory.armor_value == 0:
+                    self.inventory.player_hitpoints -= sprite.bullet_damage
+                else:
+                    self.inventory.armor_value -= sprite.bullet_damage
+                    if self.inventory.armor_value < 0:
+                        self.inventory.player_hitpoints += self.inventory.armor_value
+                        self.inventory.armor_value = 0
+                sprite.kill()
                 print("WOW IT HAPPENED")
 
         if direction == "horizontal":
@@ -168,9 +182,13 @@ class Player(pygame.sprite.Sprite):
                     if self.y_direction < 0:
                         self.hitbox.top = sprite.hitbox.bottom
 
-    def update(self):
+    def update(self, bullet_sprites, player_position, bot_group):
+        if self.inventory.player_hitpoints <= 0:
+            channel6 = pygame.mixer.Channel(5)
+            channel6.play(self.death_sounds[random.randint(0, 2)])
+            self.kill()
         self.screen.blit(self.my_hitbox_visualizer, self.hitbox.topleft)
-        self.keyboard_input()
+        self.keyboard_input(bullet_sprites)
 
         if self.inventory.weapon and self.reload_pressed is not None:
             if self.inventory.weapon.bullet_capacity != self.inventory.weapon.max_bullet_capacity:
@@ -181,12 +199,10 @@ class Player(pygame.sprite.Sprite):
         self.hitbox.x += self.x_direction
         self.hitbox.y += self.y_direction
 
-        self.collisions("horizontal")
-        self.collisions("vertical")
+        self.collisions("horizontal", bullet_sprites)
+        self.collisions("vertical", bullet_sprites)
 
         self.rect.center = self.hitbox.center
-        self.bullet_sprites.draw(self.screen)
-        self.bullet_sprites.update()
         self.inventory.render_player_items(self.hitbox)
 
     def print_crosshair(self):
@@ -201,6 +217,9 @@ class Inventory(Player):
     def __init__(self, player_hitpoints, armor_value, screen):
         self.screen = screen
         self.player_hitpoints = player_hitpoints
+        self.hp_bars = pygame.transform.scale(pygame.image.load("sprites\\UI_sprites\\health_bar.png"), (333, 45))
+        self.hp_bars_bg = pygame.Surface((333, 45))
+        self.hp_bars_bg.fill((64, 64, 64))
         self.armor_value = armor_value
         self.player_items = [Apple(), Gun("shotgun"), Gun("rifle"), Gun("pistol"), Gun("sniper"), Gun("shotgun")]
         # hopefully the inventory won't keep resetting
@@ -263,8 +282,30 @@ class Inventory(Player):
         if self.weapon is not None:
             self.weapon.display_gun(self.screen, player_hitbox)
             # change image here?
-        # now we render the HP bars and everything
+        # now we render the HP bars and everything]
+        # calculate armor and HP bar
 
+        # Calculate the length of the health and armor bars based on player's hit points
+        health_length = int((self.player_hitpoints / 100) * 333)
+        armor_length = int((self.armor_value / 100) * 333)
+
+
+        # Create the health value and armor bar based on the calculated lengths
+        if health_length > 0:
+            health_value_bar = pygame.Surface((health_length, 22))
+        else:
+            health_value_bar = pygame.Surface((0, 22))
+        health_value_bar.fill((0, 255, 0))  # Green color
+
+        armor_value_bar = pygame.Surface((armor_length, 22))
+        armor_value_bar.fill((70, 130, 180))  # Cyan color
+
+        # Render the health and armor bars on the screen
+
+        self.screen.blit(self.hp_bars_bg,(356,550))
+        self.screen.blit(health_value_bar, (356, 550))
+        self.screen.blit(armor_value_bar, (356, 550 + 22))
+        self.screen.blit(self.hp_bars, (356, 550))
 
 # honestly this is kind of redundant
 class Item(Player):
@@ -440,11 +481,12 @@ class Gun(Item):
                 "inventory_image": "sprites\\gun_sprites\\PNG\\shotgun_inventory.png",
                 "bullet_capacity": 6,
                 "bullet_damage": 25,
-                "reload_time": 300
+                "reload_time": 180
             }
         }
         self.gun_idle = gun_types.get(self.gun_type, {}).get("gun_idle")
         self.gun_firing = gun_types.get(self.gun_type, {}).get("gun_firing")
+        self.gun_firing_sound = pygame.mixer.Sound("audio\\gun_firing.mp3")
         self.gun_reloading = gun_types.get(self.gun_type, {}).get("gun_reloading")
         self.gun_inventory = gun_types.get(self.gun_type, {}).get("inventory_image")
         # if gun_bullets is not None: self.bullet_capacity = gun_bullets
@@ -469,7 +511,10 @@ class Gun(Item):
 
     def shoot(self, screen, mouse_position, bullet_sprite_group, obstacle_sprites, player_pos):
         if self.bullet_capacity > 0:
+            channel2 = pygame.mixer.Channel(1)
+            channel2.play(self.gun_firing_sound)
             self.bullet_capacity -= 1
+
             gun_firing_png = pygame.image.load(self.gun_firing)
             screen.blit(gun_firing_png,(player_pos[0]+50,player_pos[1]+15))
             print("hi")
@@ -480,19 +525,19 @@ class Gun(Item):
                           # Deviation for y-component
                         bullet_direction = pygame.Vector2(mouse_position[0] - player_pos[0] + deviation,
                                                           mouse_position[1] - player_pos[1] + deviation)
-                        bullet = Bullet(mouse_position, gun_firing_png, obstacle_sprites, screen, bullet_direction, player_pos)
+                        bullet = Bullet(mouse_position, gun_firing_png, obstacle_sprites, screen, bullet_direction, player_pos, self.bullet_damage)
                     elif i == 2:
                         deviation = 45  # Deviation for x-component
                         # Deviation for y-component
                         bullet_direction = pygame.Vector2(mouse_position[0] - player_pos[0] - deviation,
                                                           mouse_position[1] - player_pos[1] - deviation)
-                        bullet = Bullet(mouse_position, gun_firing_png, obstacle_sprites, screen, bullet_direction, player_pos)
+                        bullet = Bullet(mouse_position, gun_firing_png, obstacle_sprites, screen, bullet_direction, player_pos, self.bullet_damage)
                     else:  # Center bullet, no deviation
-                        bullet = Bullet(mouse_position, gun_firing_png, obstacle_sprites, screen, None, player_pos)
+                        bullet = Bullet(mouse_position, gun_firing_png, obstacle_sprites, screen, None, player_pos, self.bullet_damage)
                     bullet_sprite_group.add(bullet)
                     bullet.update()
             else:
-                bullet = Bullet(mouse_position, gun_firing_png, obstacle_sprites, screen, None, player_pos)
+                bullet = Bullet(mouse_position, gun_firing_png, obstacle_sprites, screen, None, player_pos, self.bullet_damage)
                 bullet_sprite_group.add(bullet)
                 bullet.update()
 
@@ -513,8 +558,9 @@ class Gun(Item):
 
 
 class Bullet(pygame.sprite.Sprite):
-    def __init__(self, mouse_position, gun_image, obstacle_sprites, screen, custom_direction, hitbox):
+    def __init__(self, mouse_position, gun_image, obstacle_sprites, screen, custom_direction, hitbox, damage):
         super().__init__()
+        self.bullet_damage = damage
         self.screen = screen
         self.obstacle_sprites = obstacle_sprites
         self.image = pygame.Surface([12, 6])

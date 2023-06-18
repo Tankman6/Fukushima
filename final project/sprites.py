@@ -6,6 +6,7 @@ class Sprites:
         # visible sprites = seen ones that don't have collision, obstacles = collisions
         self.screen = screen
         self.bot_group = pygame.sprite.Group()
+        self.bullet_sprites = pygame.sprite.Group()
         self.visible_sprites = CameraGroup()
         self.obstacle_sprites = pygame.sprite.Group()
         # set up sprites and create map
@@ -27,12 +28,14 @@ class Sprites:
                             tile.Tile((x_pos, y_pos), [self.visible_sprites, self.obstacle_sprites])
                     if map.Fukushima_Map[row][col] == "A":
                         if layer_num == 1:
-                            self.bot_group.add(bot.Bot((x_pos, y_pos), [self.visible_sprites], self.obstacle_sprites, self.screen))
+                            self.bot_group.add(bot.Bot((x_pos, y_pos), [self.visible_sprites, self.bot_group], self.obstacle_sprites, self.screen))
 
 
     def update(self):
         self.visible_sprites.custom_draw(self.character.rect.centerx, self.character.rect.centery)
-        self.visible_sprites.update()
+        self.visible_sprites.update(self.bullet_sprites, self.character.hitbox,self.bot_group)
+        self.bullet_sprites.draw(self.screen)
+        self.bullet_sprites.update()
         # update and draw the game
     # sprite_interactions
 

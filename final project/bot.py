@@ -1,6 +1,7 @@
 import pygame
 import map
 import random
+import sprites
 
 class Bot(pygame.sprite.Sprite):
     # we put this here so the inventory doesn't need to call superclass init method, therefore the parameters for init
@@ -8,8 +9,12 @@ class Bot(pygame.sprite.Sprite):
 
     def __init__(self, position, sprite_group, obstacle_sprites, screen):
         super().__init__(sprite_group)
+        self.engage_sounds = [pygame.mixer.Sound("audio\\Enemy_Contact.mp3"),
+                              pygame.mixer.Sound("audio\\Enemy_Contact_2.mp3")]
+        self.already_said_enemy_contact = False
+        self.return_fire = False
+        self.return_fire_counter = 0
         self.position = position
-        self.bullet_sprites = pygame.sprite.Group()
         self.screen = screen
         self.mouse_clicked = False
         self.clock = pygame.time.Clock()
@@ -17,21 +22,22 @@ class Bot(pygame.sprite.Sprite):
         self.armor_value = 0
         self.inventory = Inventory(self.player_hitpoints, self.armor_value)
         self.sprite_right = pygame.image.load("sprites\\player\\right\\right_0.png")
-        self.walking_sounds_outdoors = [pygame.mixer.Sound("audio\\footstep-outdoors-1.mp3"),
-                                        pygame.mixer.Sound("audio\\footstep-outdoors-2.mp3"),
-                                        pygame.mixer.Sound("audio\\footstep-outdoors-3.mp3"),
-                                        pygame.mixer.Sound("audio\\footstep-outdoors-4.mp3")]
+        self.hit_marker_sound = pygame.mixer.Sound("audio\\hit_marker.mp3")
         self.image = self.sprite_right
         self.rect = self.image.get_rect()
         self.x_direction = 0
         self.y_direction = 0
         self.obstacle_sprites = obstacle_sprites
+        self.death_sounds = [pygame.mixer.Sound("audio\\death_sound.wav"),
+                             pygame.mixer.Sound("audio\\death_sound_2.wav"),
+                             pygame.mixer.Sound("audio\\death_sound_3.wav")]
+        self.gun_reloading_sound = pygame.mixer.Sound("audio\\gun_reload.mp3")
 
         # new method i found online to change the hitbox so that its smaller
         print(self.rect)
         self.hitbox = self.rect #.inflate(-5, -5)
         print(self.hitbox)
-        self.reload_pressed = None
+        self.reloading_sound_played = None
         self.walking_direction = 0
         self.walking_direction_timer = 0
 
@@ -54,8 +60,26 @@ class Bot(pygame.sprite.Sprite):
 
         # code doesnt work since it still constantly plays as the animation is checked every 60 seconds so it needs to work on tick system
 
-    def collisions(self, direction):
-        pass
+    def collisions(self, direction, bullet_sprites, player_position):
+        for sprite in bullet_sprites:
+            if sprite.rect.colliderect(self.hitbox):
+                # return fire by the AI
+                self.return_fire = True
+                if self.already_said_enemy_contact is False:
+                    channel6 = pygame.mixer.Channel(5)
+                    channel6.play(self.engage_sounds[random.randint(0,1)])
+                    self.already_said_enemy_contact = True
+                channel4 = pygame.mixer.Channel(3)
+                channel4.play(self.hit_marker_sound)
+                if self.inventory.armor_value == 0:
+                    self.inventory.player_hitpoints -= sprite.bullet_damage
+                else:
+                    self.inventory.armor_value -= sprite.bullet_damage
+                    if self.inventory.armor_value < 0:
+                        self.inventory.player_hitpoints += sprite.bullet_damage
+                        self.inventory.armor_value = 0
+                sprite.kill()
+                print("WOW IT HAPPENED")
         # this doesn't work unless if a bullet hits yourself
         #for bullet in main.sprites.character.bullet_sprites:
             #if bullet.rect.colliderect(self.hitbox):
@@ -78,7 +102,21 @@ class Bot(pygame.sprite.Sprite):
                     if self.y_direction < 0:
                         self.hitbox.top = sprite.hitbox.bottom
 
-    def update(self):
+    def update(self, bullet_sprites, player_position, bot_group):
+        if self.return_fire:
+            for bot in bot_group:
+
+                if bot.hitbox.colliderect(pygame.Rect(player_position[0] - 500, player_position[1] - 500, 1000, 1000)):
+                    bot.return_fire = True
+                    bot.already_said_enemy_contact = True
+
+            self.return_fire_counter += 1
+            if self.return_fire_counter % 45 == 0:
+                self.inventory.weapon.shoot(self.screen, player_position, bullet_sprites, self.obstacle_sprites, self.hitbox)
+        if self.inventory.player_hitpoints <= 0:
+            channel7 = pygame.mixer.Channel(6)
+            channel7.play(self.death_sounds[random.randint(0, 2)])
+            self.kill()
         self.walking_direction_timer += 1
         if self.walking_direction_timer % 350 == 0:
             self.walking_direction += 1
@@ -87,16 +125,17 @@ class Bot(pygame.sprite.Sprite):
         self.move_ai()
         if self.inventory.weapon:
             if self.inventory.weapon.bullet_capacity <= 0:
+                if not self.reloading_sound_played:
+                    channel = pygame.mixer.Channel(6)
+                    channel.play(self.gun_reloading_sound)
+                    self.reloading_sound_played = True
                 self.inventory.weapon.reload()
-            else:
-                self.reload_pressed = None
-        self.hitbox.x += self.x_direction
-        self.collisions("horizontal")
-        self.hitbox.y += self.y_direction
-        self.collisions("vertical")
+        if self.return_fire == False:
+            self.hitbox.x += self.x_direction
+            self.hitbox.y += self.y_direction
+        self.collisions("horizontal", bullet_sprites, player_position)
+        self.collisions("vertical", bullet_sprites, player_position)
         self.rect.topleft = self.hitbox.topleft  # Update rect position to match hitbox
-        self.bullet_sprites.draw(self.screen)
-        self.bullet_sprites.update()
         self.inventory.weapon.display_gun(self.screen, self.hitbox)
 
 
@@ -171,6 +210,7 @@ class Gun(Item):
         self.gun_firing = gun_types.get(self.gun_type, {}).get("gun_firing")
         self.gun_reloading = gun_types.get(self.gun_type, {}).get("gun_reloading")
         self.gun_inventory = gun_types.get(self.gun_type, {}).get("inventory_image")
+        self.gun_firing_sound = pygame.mixer.Sound("audio\\gun_firing.mp3")
         # if gun_bullets is not None: self.bullet_capacity = gun_bullets
         self.max_bullet_capacity = self.bullet_capacity = gun_types.get(self.gun_type, {}).get("bullet_capacity")
         self.bullet_damage = gun_types.get(self.gun_type, {}).get("bullet_damage")
@@ -178,7 +218,6 @@ class Gun(Item):
         self.gun_font = pygame.font.SysFont("arial", 35)
         self.bullet_capacity_text = self.gun_font.render(str(self.bullet_capacity), True, (255,255,255))
         self.reload_start_time = 0
-        print(self.gun_idle, "FDSIKFJSDFOI")
         super().__init__(self.item_type, self.gun_type, [self.gun_idle, self.gun_firing, self.gun_reloading], self.gun_inventory)
 
     def display_gun(self, screen, bot_location):
@@ -186,19 +225,25 @@ class Gun(Item):
         screen.blit(gun_idle_png, bot_location)
 
 
-    def shoot(self, screen, mouse_position, bullet_sprite_group, obstacle_sprites, bot_location):
+    def shoot(self, screen, player_position, bullet_sprite_group, obstacle_sprites, bot_location):
         if self.bullet_capacity > 0:
+            channel = pygame.mixer.Channel(7)
+            channel.set_volume(0.5)
+            channel.play(self.gun_firing_sound)
             self.bullet_capacity -= 1
             gun_firing_png = pygame.image.load(self.gun_firing)
             screen.blit(gun_firing_png, bot_location)
             print("hi")
-            bullet = Bullet(mouse_position, gun_firing_png, obstacle_sprites, screen, None)
+            # mouse position replaced with player position
+            bullet = Bullet(player_position, gun_firing_png, obstacle_sprites, screen, None, bot_location, self.bullet_damage)
             bullet_sprite_group.add(bullet)
             bullet.update()
 
 
         # make group of bullet sprites here
         # bullet.go(vector_direction)
+
+
 
     def reload(self):
         self.reload_start_time += 1
@@ -213,16 +258,23 @@ class Gun(Item):
 
 
 class Bullet(pygame.sprite.Sprite):
-    def __init__(self, mouse_position, gun_image, obstacle_sprites, screen, custom_direction):
+    def __init__(self, mouse_position, gun_image, obstacle_sprites, screen, custom_direction, hitbox, damage):
         super().__init__()
+        self.bullet_damage = damage
         self.screen = screen
         self.obstacle_sprites = obstacle_sprites
         self.image = pygame.Surface([12, 6])
         self.image.fill((255, 204, 0))
         self.rect = self.image.get_rect()
-        self.rect.center = (Bot.hitbox.x + gun_image.get_width(), Bot.hitbox.y)
+        self.hitbox = hitbox
+        self.rect.center = (self.hitbox.x + gun_image.get_width() + 50, self.hitbox.y + 28)
         if custom_direction is None:
-            direction = pygame.math.Vector2(mouse_position[0] - Bot.hitbox.x, mouse_position[1] - Bot.hitbox.y)
+            # calculate custom direction:
+            # RANDOM CALCULATION WITH DEVIATION SIMILAR TO SHOTGUN
+            original_direction = pygame.math.Vector2(mouse_position[0] - self.hitbox.x, mouse_position[1] - self.hitbox.y)
+            deviation_x = random.uniform(-20, 20)
+            deviation_y = random.uniform(-20, 20)
+            direction = original_direction + pygame.math.Vector2(deviation_x,deviation_y)
         else:
             direction = custom_direction
         self.direction = direction.normalize()  # Normalize the direction vector
