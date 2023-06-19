@@ -32,8 +32,8 @@ class Sprites:
 
 
     def update(self):
-        self.visible_sprites.custom_draw(self.character.rect.centerx, self.character.rect.centery)
-        self.visible_sprites.update(self.bullet_sprites, self.character.hitbox,self.bot_group)
+        self.visible_sprites.custom_draw(self.character.rect)
+        self.visible_sprites.update(self.bullet_sprites, self.character.rect,self.bot_group)
         self.bullet_sprites.draw(self.screen)
         self.bullet_sprites.update()
         # update and draw the game
@@ -50,16 +50,21 @@ class CameraGroup(pygame.sprite.Group):
         self.background = pygame.image.load("ground.png")
         self.background_rect = self.background.get_rect()
 
-    def custom_draw(self, player_rect_centerx, player_rect_centery):
-        self.offset[0] = player_rect_centerx - self.half_width
-        self.offset[1] = player_rect_centery - self.half_height
+    def custom_draw(self, player_rect):
+        player_rect_centerx =  player_rect[0]
+        player_rect_centery = player_rect[1]
+
+        self.offset[0] = player_rect[0] - self.half_width
+        self.offset[1] = player_rect[1] - self.half_height
         self.background_offset_x = self.background_rect.topleft[0] - self.offset[0]
         self.background_offset_y = self.background_rect.topleft[1] - self.offset[1]
         self.screen.blit(self.background, (self.background_offset_x, self.background_offset_y))
+
         for sprite in self.sprites():
-            offset_x = sprite.rect.topleft[0] - self.offset[0]
-            offset_y = sprite.rect.topleft[1] - self.offset[1]
+            offset_x = sprite.rect[0] - self.offset[0]
+            offset_y = sprite.rect[1] - self.offset[1]
             offset_pos = (offset_x, offset_y)
             self.screen.blit(sprite.image, offset_pos)
-        self.cursor_image = pygame.image.load("sprites\\Crosshairs_Red.png")
-        self.screen.blit(self.cursor_image, player.Player.print_crosshair(self))
+
+        self.cursor_image = pygame.image.load("sprites/Crosshairs_Red.png")
+        self.screen.blit(self.cursor_image, (player_rect_centerx, player_rect_centery))

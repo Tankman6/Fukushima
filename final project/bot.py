@@ -24,7 +24,7 @@ class Bot(pygame.sprite.Sprite):
         self.sprite_right = pygame.image.load("sprites\\player\\right\\right_0.png")
         self.hit_marker_sound = pygame.mixer.Sound("audio\\hit_marker.mp3")
         self.image = self.sprite_right
-        self.rect = self.image.get_rect()
+        self.rect = self.image.get_rect(topleft=(position[0]-514,position[1]+138))
         self.x_direction = 0
         self.y_direction = 0
         self.obstacle_sprites = obstacle_sprites
@@ -34,9 +34,8 @@ class Bot(pygame.sprite.Sprite):
         self.gun_reloading_sound = pygame.mixer.Sound("audio\\gun_reload.mp3")
 
         # new method i found online to change the hitbox so that its smaller
-        print(self.rect)
-        self.hitbox = self.rect #.inflate(-5, -5)
-        print(self.hitbox)
+        self.hitbox = self.rect.inflate(-5, -5)
+
         self.reloading_sound_played = None
         self.walking_direction = 0
         self.walking_direction_timer = 0
@@ -267,13 +266,13 @@ class Bullet(pygame.sprite.Sprite):
         self.image.fill((255, 204, 0))
         self.rect = self.image.get_rect()
         self.hitbox = hitbox
-        self.rect.center = (self.hitbox.x + gun_image.get_width() + 50, self.hitbox.y + 28)
+        self.rect.center = (self.hitbox.x + gun_image.get_width(), self.hitbox.y)
         if custom_direction is None:
             # calculate custom direction:
             # RANDOM CALCULATION WITH DEVIATION SIMILAR TO SHOTGUN
             original_direction = pygame.math.Vector2(mouse_position[0] - self.hitbox.x, mouse_position[1] - self.hitbox.y)
-            deviation_x = random.uniform(-20, 20)
-            deviation_y = random.uniform(-20, 20)
+            deviation_x = random.uniform(-30, 30)
+            deviation_y = random.uniform(0, 30)
             direction = original_direction + pygame.math.Vector2(deviation_x,deviation_y)
         else:
             direction = custom_direction
